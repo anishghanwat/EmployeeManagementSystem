@@ -16,16 +16,22 @@ def load_env():
 def init_db():
     load_env()
     
+    
     try:
-        print("Connecting to database...")
+        print("Connecting to MySQL server...")
+        # Connect without selecting database first
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
             port=int(os.getenv("DB_PORT", 3306))
         )
         cursor = conn.cursor()
+        
+        db_name = os.getenv("DB_NAME")
+        print(f"Creating database '{db_name}' if it doesn't exist...")
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name}")
+        cursor.execute(f"USE {db_name}")
         
         print("Creating table 'employees'...")
         # Schema from init.sql
