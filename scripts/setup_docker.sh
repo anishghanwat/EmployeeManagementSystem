@@ -28,6 +28,10 @@ echo \
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+echo "Starting Docker Service..."
+sudo systemctl start docker
+sudo systemctl enable docker
+
 # Check if Nginx is running and stop it/ensure it proxies effectively
 # In our architecture, Nginx (Host) -> Localhost:8000 (Docker Container)
 # So we make sure Nginx IS running and configured, but we DON'T need the systemd service for python anymore.
