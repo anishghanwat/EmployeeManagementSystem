@@ -36,6 +36,23 @@ echo "--- 6. Checking Environment Variables (Masked) ---"
 if [ -f backend/.env ]; then
     echo "Found backend/.env file."
     grep -v "PASSWORD" backend/.env
+    
+    echo ""
+    echo "--- 7. Testing Database Connectivity (Network) ---"
+    # Extract DB Host
+    DB_HOST=$(grep DB_HOST backend/.env | cut -d '=' -f2)
+    echo "Testing connection to DB_HOST: $DB_HOST on port 3306..."
+    if command -v nc >/dev/null 2>&1; then
+        nc -zv -w 5 "$DB_HOST" 3306
+        if [ $? -eq 0 ]; then
+             echo "✅ Network connection to RDS successful!"
+        else
+             echo "❌ Connection timed out / failed. CHECK SECURITY GROUPS!"
+             echo "Ensure your RDS Security Group allows Inbound traffic on port 3306 from this EC2 instance's Security Group."
+        fi
+    else
+        echo "nc (netcat) not installed, skipping network check."
+    fi
 else
     echo "❌ ERROR: backend/.env file is MISSING!"
 fi
