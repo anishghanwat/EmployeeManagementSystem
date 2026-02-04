@@ -81,12 +81,23 @@ sudo systemctl restart nginx
 
 echo "Building and Starting Docker Containers..."
 cd "$APP_DIR"
+
+# Verify if the code fix is present
+if grep -q 'prefix="/api"' "$APP_DIR/backend/app/main.py"; then
+    echo "✅ Code fix verified: prefix='/api' found in main.py"
+else
+    echo "⚠️ Code fix NOT found in main.py. Attempting to pull latest..."
+    git pull
+fi
+
 # Check if .env exists
 if [ ! -f backend/.env ]; then
     echo "ERROR: backend/.env file not found! Please create it with your DB credentials."
     exit 1
 fi
 
+# Force stop and remove old containers to ensure clean rebuild
+sudo docker compose -f docker-compose.prod.yml down --rmi local
 sudo docker compose -f docker-compose.prod.yml up -d --build
 
 echo "Docker Deployment Complete!"
