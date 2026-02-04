@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '/api';
 
 // State Management
 let employees = [];
@@ -28,7 +28,7 @@ function setupEventListeners() {
     closeModalBtn.addEventListener('click', closeModal);
     cancelBtn.addEventListener('click', closeModal);
     employeeForm.addEventListener('submit', handleFormSubmit);
-    
+
     // Close modal on outside click
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -42,7 +42,7 @@ async function loadEmployees() {
     try {
         const response = await fetch(`${API_BASE_URL}/employees`);
         if (!response.ok) throw new Error('Failed to fetch employees');
-        
+
         employees = await response.json();
         renderEmployees();
     } catch (error) {
@@ -60,9 +60,9 @@ async function createEmployee(employeeData) {
             },
             body: JSON.stringify(employeeData),
         });
-        
+
         if (!response.ok) throw new Error('Failed to create employee');
-        
+
         const newEmployee = await response.json();
         employees.push(newEmployee);
         renderEmployees();
@@ -83,9 +83,9 @@ async function updateEmployee(id, employeeData) {
             },
             body: JSON.stringify(employeeData),
         });
-        
+
         if (!response.ok) throw new Error('Failed to update employee');
-        
+
         const updatedEmployee = await response.json();
         const index = employees.findIndex(emp => emp.id === id);
         if (index !== -1) {
@@ -104,14 +104,14 @@ async function deleteEmployee(id) {
     if (!confirm('Are you sure you want to delete this employee?')) {
         return;
     }
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/employees/${id}`, {
             method: 'DELETE',
         });
-        
+
         if (!response.ok) throw new Error('Failed to delete employee');
-        
+
         employees = employees.filter(emp => emp.id !== id);
         renderEmployees();
         showSuccess('Employee deleted successfully!');
@@ -128,9 +128,9 @@ function renderEmployees() {
         emptyState.style.display = 'block';
         return;
     }
-    
+
     emptyState.style.display = 'none';
-    
+
     employeesGrid.innerHTML = employees.map(employee => `
         <div class="employee-card">
             <div class="employee-header">
@@ -182,7 +182,7 @@ function openEditModal(id) {
     isEditMode = true;
     currentEmployeeId = id;
     modalTitle.textContent = 'Edit Employee';
-    
+
     const employee = employees.find(emp => emp.id === id);
     if (employee) {
         document.getElementById('name').value = employee.name;
@@ -192,7 +192,7 @@ function openEditModal(id) {
         document.getElementById('salary').value = employee.salary;
         document.getElementById('date_joined').value = employee.date_joined;
     }
-    
+
     modal.classList.add('active');
 }
 
@@ -206,7 +206,7 @@ function closeModal() {
 // Form Handler
 function handleFormSubmit(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(employeeForm);
     const employeeData = {
         name: formData.get('name'),
@@ -216,7 +216,7 @@ function handleFormSubmit(e) {
         salary: parseFloat(formData.get('salary')),
         date_joined: formData.get('date_joined'),
     };
-    
+
     if (isEditMode && currentEmployeeId) {
         updateEmployee(currentEmployeeId, employeeData);
     } else {
