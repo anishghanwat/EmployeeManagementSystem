@@ -4,8 +4,15 @@
 
 # Exit on error
 set -e
+# Enable debug mode to see executed commands
+set -x
 
-APP_DIR="/home/ubuntu/EmployeeManagementSystem"
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Get the project root directory (parent of scripts/)
+APP_DIR="$(dirname "$SCRIPT_DIR")"
+
+echo "Detected APP_DIR: $APP_DIR"
 
 echo "Updating system packages..."
 sudo apt update && sudo apt upgrade -y
@@ -39,6 +46,26 @@ sudo systemctl enable docker
 echo "Stopping local Systemd backend service (if active)..."
 sudo systemctl stop ems-backend || true
 sudo systemctl disable ems-backend || true
+
+# Copy Frontend Files to /var/www/ems-frontend (to avoid permission issues)
+echo "Deploying Frontend Files..."
+sudo mkdir -p /var/www/ems-frontend
+# Clean up old files
+sudo rm -rf /var/www/ems-frontend/*
+# Copy new files
+if [ -d "$APP_DIR/frontend" ]; then
+    sudo cp -r "$APP_DIR/frontend/"* /var/www/ems-frontend/
+else
+    echo "ERROR: Frontend directory not found at $APP_DIR/frontend"
+    exit 1
+fi
+
+sudo chown -R www-data:www-data /var/www/ems-frontend
+sudo chmod -R 755 /var/www/ems-frontend
+
+# List files to verify
+echo "Verifying /var/www/ems-frontend content:"
+ls -la /var/www/ems-frontend
 
 echo "Configuring Nginx (if not already done)..."
 # We reuse the same Nginx config because it points to localhost:8000
